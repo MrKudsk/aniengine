@@ -1,7 +1,7 @@
 # aniengine
 
-‘‘‘ code
+''' code
 cc -o nob nob.c
-‘‘‘
+'''
 
 
