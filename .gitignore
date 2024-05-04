@@ -1,6 +1,9 @@
 main
 nob
 
+*.gz
+*.zip
+*.tar
 # Prerequisites
 *.d
 
