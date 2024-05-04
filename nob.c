@@ -11,10 +11,9 @@ void libs(Nob_Cmd *cmd) {
   // nob_cmd_append(&cmd, "-Wl,-rpath=./raylib/raylib-5.0_macos/lib/");
   nob_cmd_append(cmd, "-L./raylib/raylib-5.0_macos/lib/");
   nob_cmd_append(cmd, "-framework", "CoreVideo");
-  nob_cmd_append(cmd, "-framework", "IOKit");
   nob_cmd_append(cmd, "-framework", "Cocoa");
+  nob_cmd_append(cmd, "-framework", "IOKit");
   nob_cmd_append(cmd, "-framework", "GLUT");
-  nob_cmd_append(cmd, "-framework", "OpenGL");
   nob_cmd_append(cmd, "./raylib/raylib-5.0_macos/lib/libraylib.a");
 }
 
@@ -35,6 +34,7 @@ bool build_main(Nob_Cmd *cmd) {
   nob_cmd_append(cmd, "main.c");
   nob_cmd_append(cmd, "./libplug.so");
   libs(cmd);
+  nob_cmd_append(cmd, "-framework", "OpenGL");
   return nob_cmd_run_sync(*cmd);
 }
 
