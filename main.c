@@ -50,7 +50,9 @@ int main() {
   if (!reload_libplug())
     return 1;
 
-  InitWindow(800, 600, "Panim");
+  float factor = 50.0f;
+  InitWindow(16 * factor, 9 * factor, "Panim");
+  SetTargetFPS(60);
   plug_init();
 
   while (!WindowShouldClose()) {
