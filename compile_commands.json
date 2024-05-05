@@ -1,0 +1,62 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-ggdb",
+      "-I./raylib/raylib-5.0_macos/include/",
+      "-fPIC",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "./raylib/raylib-5.0_macos/lib/libraylib.dylib",
+      "-rpath",
+      "./raylib/raylib-5.0_macos/lib/",
+      "-o",
+      "./libplug.so",
+      "plug.c"
+    ],
+    "directory": "/Users/kim/dev/aniengine",
+    "file": "/Users/kim/dev/aniengine/plug.c",
+    "output": "/Users/kim/dev/aniengine/libplug.so"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-ggdb",
+      "-I./raylib/raylib-5.0_macos/include/",
+      "./libplug.so",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "./raylib/raylib-5.0_macos/lib/libraylib.dylib",
+      "-rpath",
+      "./raylib/raylib-5.0_macos/lib/",
+      "-o",
+      "main",
+      "main.c"
+    ],
+    "directory": "/Users/kim/dev/aniengine",
+    "file": "/Users/kim/dev/aniengine/main.c",
+    "output": "/Users/kim/dev/aniengine/main"
+  }
+]

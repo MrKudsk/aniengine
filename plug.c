@@ -25,6 +25,6 @@ void plug_post_reload(void *state) { p = state; }
 
 void plug_update(void) {
   BeginDrawing();
-  ClearBackground(YELLOW);
+  ClearBackground(BLUE);
   EndDrawing();
 }

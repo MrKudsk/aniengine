@@ -4,6 +4,7 @@ nob
 *.gz
 *.zip
 *.tar
+.cache/
 # Prerequisites
 *.d
 
