@@ -25,7 +25,8 @@ bool build_plug(Nob_Cmd *cmd) {
   cc(cmd);
   nob_cmd_append(cmd, "-fPIC", "-shared");
   nob_cmd_append(cmd, "-o", "./libplug.so");
-  nob_cmd_append(cmd, "plug.c");
+  // nob_cmd_append(cmd, "plug.c");
+  nob_cmd_append(cmd, "star.c");
   libs(cmd);
   return nob_cmd_run_sync(*cmd);
 }
