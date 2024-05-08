@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,27 +13,14 @@ typedef struct {
   float z;
 } Star;
 
-static Star *s = NULL;
-
-void star_init(void) {
-  int star_count = 100;
-  s = malloc(star_count * sizeof(Star));
-
-  int w = GetScreenWidth();
-  int h = GetScreenHeight();
-  for (int i = 0; i < star_count; ++i) {
-    s[i].x = GetRandomValue(-w, w);
-    s[i].y = GetRandomValue(-h, h);
-    s[i].z = GetRandomValue(0, w);
-  }
-}
-
 float remap(float x, float fromA, float toA, float fromB, float toB) {
-  return (x - fromA) / (toA - fromA) * (toB - fromA) + fromB;
+  // return (x - fromA) / (toB - fromB) * (toA - fromA) + fromB;
+  return (x - fromA) / (toA - fromA) * (toB - fromB) + fromB;
 }
 
 typedef struct {
   Color background;
+  Star *s;
 } Plug;
 
 static Plug *p = NULL;
@@ -45,7 +33,22 @@ void plug_init(void) {
   TraceLog(LOG_INFO, "--------------------");
   TraceLog(LOG_INFO, " Initialized plugin");
   TraceLog(LOG_INFO, "--------------------");
-  star_init();
+
+  int star_count = 100;
+  p->s = malloc(star_count * sizeof(Star));
+
+  int w = GetScreenWidth() / 2;
+  int h = GetScreenHeight() / 2;
+  for (int i = 0; i < star_count; ++i) {
+    p->s[i].x = GetRandomValue(-w, w);
+    p->s[i].y = GetRandomValue(-h, h);
+    p->s[i].z = GetRandomValue(0, w);
+  }
+  // printf("z = 0, r = %f\n", remap(0, 0.0, w, 12.0, 0.0));
+  // printf("z = w, r = %f\n", remap(w, 0.0, w, 0.0, w / 2.0));
+  TraceLog(LOG_INFO, "--------------------");
+  TraceLog(LOG_INFO, "  Initialized star");
+  TraceLog(LOG_INFO, "--------------------");
 }
 
 void *plug_pre_reload(void) { return p; }
@@ -56,25 +59,37 @@ void plug_update(void) {
 
   float w = GetScreenWidth();
   float h = GetScreenHeight();
-  float t = GetTime();
-  float rw = 100;
-  float rh = 100;
-  float pad = rw * 0.15f;
+  // float t = GetTime();
+  // float rw = 100;
+  // float rh = 100;
+  // float pad = rw * 0.15f;
 
   BeginDrawing();
   ClearBackground(GetColor(0x181818FF));
   Color star_color = WHITE;
   for (size_t i = 0; i < 100; ++i) {
-    float x = s[i].x;
-    float y = s[i].y;
-    float z = s[i].z;
+    float x = p->s[i].x;
+    float y = p->s[i].y;
+    float z = p->s[i].z;
 
     z--;
+    if (z < 1) {
+      p->s[i].x = GetRandomValue(-w / 2, w / 2);
+      p->s[i].y = GetRandomValue(-h / 2, h / 2);
+      z = w;
+    }
+
     float sx = remap(x / z, 0.0, 1.0, 0.0, w);
     float sy = remap(y / z, 0.0, 1.0, 0.0, h);
-    DrawEllipse(sx + (w / 2), sy + (h / 2), 4.0, 4.0, star_color);
-    s[i].z = z;
+    float r = remap(z, 0.0, w, 12.0, 0.0);
+    DrawEllipse(sx + (w / 2), (h / 2) - sy, r, r, star_color);
+    // if (i == 1) {
+    //   printf("x = %f, y = %f, z = %f\n", sx, sy, z);
+    // }
+    p->s[i].z = z;
   }
+  // DrawEllipse(10 + (w / 2), (h / 2) - 10, 4.0, 4.0, BLUE);
+  // DrawEllipse(0 + (w / 2), (h / 2) - 0, 4.0, 4.0, GREEN);
 
   EndDrawing();
 }
