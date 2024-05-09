@@ -1,16 +1,11 @@
 #include <assert.h>
+#include <math.h>
 #include <raylib.h>
 #include <raymath.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "nob.h"
-
-typedef struct {
-  Color background;
-} Plug;
-
-static Plug *p = NULL;
 
 typedef struct {
   float from;
@@ -20,17 +15,40 @@ typedef struct {
 
 typedef struct {
   size_t i;
-  float t;
   float duration;
+  bool loop;
 } Animation;
 
-// float animation_interpolator(Animation *a, KeyFrame kf) {
-//   lerp(kf->from, kf->to, a->duration / kf.duration);
-// }
+typedef struct {
+  Color background;
+  Animation a;
+} Plug;
+
+static Plug *p = NULL;
+
+float animation_value(Animation a, KeyFrame *kfs, size_t kfs_count) {
+  assert(kfs_count > 0);
+
+  if (a.i >= kfs_count) {
+    return kfs[kfs_count = 1].to;
+  }
+
+  KeyFrame *kf = &kfs[a.i];
+
+  return Lerp(kf->from, kf->to, a.duration / kf->duration);
+}
 
 void update_animation(Animation *a, KeyFrame *kfs, size_t kfs_count) {
-  if (a->i < kfs_count)
-    return;
+  assert(kfs_count > 0);
+
+  if (a->i < kfs_count) {
+    if (a->loop) {
+      a->i = 0;
+      a->duration = 0.0;
+    } else {
+      return;
+    }
+  }
   KeyFrame *kf = &kfs[a->i];
 
   float dt = GetFrameTime();
@@ -48,6 +66,7 @@ void plug_init(void) {
   assert(p != NULL);
   memset(p, 0, sizeof(*p));
   p->background = GREEN;
+  p->a.loop = true;
   TraceLog(LOG_INFO, "--------------------");
   TraceLog(LOG_INFO, " Initialized plugin");
   TraceLog(LOG_INFO, "--------------------");
@@ -58,35 +77,64 @@ void *plug_pre_reload(void) { return p; }
 void plug_post_reload(void *state) { p = state; }
 
 void plug_update(void) {
-  KeyFrame kfs[] = {
-      {
-          .from = 0.0,
-          .to = 1.0,
-          .duration = 1.0,
-      },
-      {
-          .from = 1.0,
-          .to = 0.0,
-          .duration = 0.250,
-      },
-  };
-
-  Animation a = {0};
-
   float w = GetScreenWidth();
   float h = GetScreenHeight();
-  float t = GetTime();
   float rw = 100;
   float rh = 100;
   float pad = rw * 0.15f;
+  Vector2 cell_size = {rw, rh};
+
+  size_t offset = 7;
+  KeyFrame kfs[] = {
+      {
+          .from = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .duration = 0.5,
+      },
+      {
+          .from = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .to = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .duration = 0.5,
+      },
+  };
 
   BeginDrawing();
-  update_animation(&a, kfs, NOB_ARRAY_LEN(kfs));
+  update_animation(&p->a, kfs, NOB_ARRAY_LEN(kfs));
+  float t = animation_value(p->a, kfs, NOB_ARRAY_LEN(kfs));
   ClearBackground(GetColor(0x181818FF));
   Color cell_color = ColorFromHSV(0, 0.8, 1);
-  for (size_t i = 0; i < 10; ++i) {
-    DrawRectangle(i * (rw + pad) - w * (sinf(t * 2) + 1.0f) * 0.5f,
-                  h / 2 - rh / 2, rw, rh, cell_color);
+  for (size_t i = 0; i < 20; ++i) {
+    DrawRectangle(i * (rw + pad) - w * t, h / 2 - rh / 2, rw, rh, cell_color);
   }
 
   float head_thick = 15.0f;
