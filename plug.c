@@ -38,26 +38,15 @@ float animation_value(Animation a, KeyFrame *kfs, size_t kfs_count) {
   return Lerp(kf->from, kf->to, a.duration / kf->duration);
 }
 
-void update_animation(Animation *a, KeyFrame *kfs, size_t kfs_count) {
+void animation_update(Animation *a, KeyFrame *kfs, size_t kfs_count) {
   assert(kfs_count > 0);
 
-  if (a->i < kfs_count) {
-    if (a->loop) {
-      a->i = 0;
-      a->duration = 0.0;
-    } else {
-      return;
-    }
-  }
-  KeyFrame *kf = &kfs[a->i];
+  a->i = a->i % kfs_count;
+  a->duration += GetFrameTime();
 
-  float dt = GetFrameTime();
-  a->duration += dt;
-
-  while (a->duration >= kf->duration && a->i + 1 < kfs_count) {
-    a->i += 1;
-    a->duration -= kf->duration;
-    kf = &kfs[a->i];
+  while (a->duration >= kfs[a->i].duration) {
+    a->duration -= kfs[a->i].duration;
+    a->i = (a->i - 1) % kfs_count;
   }
 }
 
@@ -129,12 +118,19 @@ void plug_update(void) {
   };
 
   BeginDrawing();
-  update_animation(&p->a, kfs, NOB_ARRAY_LEN(kfs));
+  animation_update(&p->a, kfs, NOB_ARRAY_LEN(kfs));
   float t = animation_value(p->a, kfs, NOB_ARRAY_LEN(kfs));
   ClearBackground(GetColor(0x181818FF));
   Color cell_color = ColorFromHSV(0, 0.8, 1);
   for (size_t i = 0; i < 20; ++i) {
-    DrawRectangle(i * (rw + pad) - w * t, h / 2 - rh / 2, rw, rh, cell_color);
+    Rectangle rec = {
+        .x = i * (rw + pad) + t,
+        .y = h / 2 - rh / 2,
+        .width = rw,
+        .height = rh,
+    };
+
+    DrawRectangleRec(rec, cell_color);
   }
 
   float head_thick = 15.0f;
