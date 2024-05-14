@@ -5,7 +5,7 @@
 #include <dlfcn.h>
 #include <raylib.h>
 
-const char *libplug_path = "libplug.so";
+const char *libplug_path = "build/libplug.so";
 void *libplug = NULL;
 
 bool reload_libplug() {

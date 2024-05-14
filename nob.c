@@ -1,10 +1,14 @@
 #define NOB_IMPLEMENTATION
 #include "nob.h"
 
+#define BUILD_DIR "./build"
+
 void cc(Nob_Cmd *cmd) {
-  nob_cmd_append(cmd, "cc");
+  // nob_cmd_append(cmd, "cc");
+  nob_cmd_append(cmd, "clang");
   nob_cmd_append(cmd, "-Wall", "-Wextra", "-ggdb");
   nob_cmd_append(cmd, "-I./raylib/raylib-5.0_macos/include/");
+  nob_cmd_append(cmd, "-I" BUILD_DIR "/");
 }
 
 void libs(Nob_Cmd *cmd) {
@@ -24,8 +28,8 @@ bool build_plug(Nob_Cmd *cmd) {
   cmd->count = 0;
   cc(cmd);
   nob_cmd_append(cmd, "-fPIC", "-shared");
-  nob_cmd_append(cmd, "-o", "./libplug.so");
-  nob_cmd_append(cmd, "plug.c");
+  nob_cmd_append(cmd, "-o", BUILD_DIR "/libplug.so");
+  nob_cmd_append(cmd, "plug.c", "ffmpeg_linux.c");
   libs(cmd);
   return nob_cmd_run_sync(*cmd);
 }
@@ -33,9 +37,9 @@ bool build_plug(Nob_Cmd *cmd) {
 bool build_main(Nob_Cmd *cmd) {
   cmd->count = 0;
   cc(cmd);
-  nob_cmd_append(cmd, "-o", "main");
+  nob_cmd_append(cmd, "-o", BUILD_DIR "/main");
   nob_cmd_append(cmd, "main.c");
-  nob_cmd_append(cmd, "./libplug.so");
+  nob_cmd_append(cmd, BUILD_DIR "/libplug.so");
   libs(cmd);
   return nob_cmd_run_sync(*cmd);
 }
