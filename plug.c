@@ -61,7 +61,7 @@ void animation_update(Animation *a, KeyFrame *kfs, size_t kfs_count) {
 
 static void load_resources(void) {
   p->font =
-      LoadFontEx("./resources/fonts/iosevka-regular.ttf", FONT_SIZE, NULL, 0);
+      LoadFontEx("./resources/fonts/iosevka-Bold.ttf", FONT_SIZE, NULL, 0);
 }
 
 static void unload_resources(void) { UnloadFont(p->font); }
