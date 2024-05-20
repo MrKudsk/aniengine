@@ -23,12 +23,22 @@ typedef struct {
 } Animation;
 
 typedef struct {
+  const char *from;
+  const char *to;
+  float t;
+} Cell;
+
+#define TAPE_COUNT 20
+
+typedef struct {
   size_t size;
 
   Animation a;
   FFMPEG *ffmpeg;
   RenderTexture2D screen;
   float rendering_duration;
+
+  Cell tape[TAPE_COUNT];
 
   Font font;
 } Plug;
@@ -71,6 +81,11 @@ void plug_init(void) {
   assert(p != NULL);
   memset(p, 0, sizeof(*p));
   p->size = sizeof(*p);
+  p->screen = LoadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
+  for (size_t i = 0, i < TAPE_COUNT, ++i) {
+    p->tape[i].from = "69";
+    p->tape[i].to = "420";
+  }
   load_resources();
   TraceLog(LOG_INFO, "--------------------");
   TraceLog(LOG_INFO, " Initialized plugin");
