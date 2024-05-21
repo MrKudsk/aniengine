@@ -9,6 +9,8 @@
 #include "nob.h"
 
 #define FONT_SIZE 52
+#define RENDER_WIDTH 1600
+#define RENDER_HEIGHT 900
 
 typedef struct {
   float from;
@@ -57,11 +59,11 @@ float animation_value(Animation a, KeyFrame *kfs, size_t kfs_count) {
   return Lerp(kf->from, kf->to, a.duration / kf->duration);
 }
 
-void animation_update(Animation *a, KeyFrame *kfs, size_t kfs_count) {
+void animation_update(Animation *a, float dt, KeyFrame *kfs, size_t kfs_count) {
   assert(kfs_count > 0);
 
   a->i = a->i % kfs_count;
-  a->duration += GetFrameTime();
+  a->duration += dt;
 
   while (a->duration >= kfs[a->i].duration) {
     a->duration -= kfs[a->i].duration;
@@ -82,7 +84,7 @@ void plug_init(void) {
   memset(p, 0, sizeof(*p));
   p->size = sizeof(*p);
   p->screen = LoadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
-  for (size_t i = 0, i < TAPE_COUNT, ++i) {
+  for (size_t i = 0; i < TAPE_COUNT; ++i) {
     p->tape[i].from = "69";
     p->tape[i].to = "420";
   }
@@ -97,7 +99,51 @@ void *plug_pre_reload(void) {
   return p;
 }
 
-void plug_post_reload(void *state) { p = state; }
+void plug_post_reload(void *state) {
+  p = state;
+  if (p->size < sizeof(*p)) {
+    TraceLog(LOG_INFO, "Migrating plug state schema %zu bytes -> %zu bytes",
+             p->size, sizeof(*p));
+    p = realloc(p, sizeof(*p));
+    p->size = sizeof(*p);
+  }
+  load_resources();
+}
+
+static KeyFrame head_kfs[] = {
+    {
+        .from = 0,
+        .to = 0,
+        .duration = 0.5,
+    },
+    {
+        .from = 0,
+        .to = 1,
+        .duration = 0.5,
+    },
+    {
+        .from = 1,
+        .to = 1,
+        .duration = 0.5,
+    },
+    {
+        .from = 1,
+        .to = 2,
+        .duration = 0.5,
+    },
+    {
+        .from = 2,
+        .to = 2,
+        .duration = 0.5,
+    },
+    {
+        .from = 2,
+        .to = 3,
+        .duration = 0.5,
+    },
+};
+
+#define head_kfs_count NOB_ARRAY_LEN(head_kfs)
 
 void plug_update(void) {
   float w = GetScreenWidth();
@@ -162,7 +208,7 @@ void plug_update(void) {
 #endif
 
   BeginDrawing();
-  animation_update(&p->a, kfs, NOB_ARRAY_LEN(kfs));
+  animation_update(&p->a, GetFrameTime(), kfs, NOB_ARRAY_LEN(kfs));
   float t = animation_value(p->a, kfs, NOB_ARRAY_LEN(kfs));
   ClearBackground(background_color);
   for (size_t i = 0; i < 20; ++i) {
