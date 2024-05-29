@@ -9,6 +9,10 @@
 #include "nob.h"
 
 #define FONT_SIZE 52
+#define CELL_WIDTH 100.0f
+#define CELL_HEIGHT 100.0f
+#define CELL_PAD (CELL_WIDTH * 0.15)
+
 #define RENDER_WIDTH 1600
 #define RENDER_HEIGHT 900
 
@@ -145,57 +149,63 @@ static KeyFrame head_kfs[] = {
 
 #define head_kfs_count NOB_ARRAY_LEN(head_kfs)
 
-void plug_update(void) {
-  float w = GetScreenWidth();
-  float h = GetScreenHeight();
-  float rw = 100;
-  float rh = 100;
-  float pad = rw * 0.15f;
-  Vector2 cell_size = {rw, rh};
+void turing_machine_tape(Animation a, float dt, float w, float h) {
+  Vector2 cell_size = {CELL_WIDTH, CELL_HEIGHT};
 
   size_t offset = 7;
   KeyFrame kfs[] = {
       {
-          .from = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 0) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 0) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 0) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 1) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 1) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 1) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 1) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 1) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 2) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 2) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 2) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 2) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 2) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 3) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 3) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 3) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
       {
-          .from = w / 2 - rw / 2 - (offset + 3) * (rw + pad),
-          .to = w / 2 - rw / 2 - (offset + 0) * (rw + pad),
+          .from =
+              w / 2 - CELL_WIDTH / 2 - (offset + 3) * (CELL_WIDTH + CELL_PAD),
+          .to = w / 2 - CELL_WIDTH / 2 - (offset + 0) * (CELL_WIDTH + CELL_PAD),
           .duration = 0.5,
       },
   };
+
+  size_t kfs_count = NOB_ARRAY_LEN(kfs);
+  animation_update(&a, dt, kfs, kfs_count);
 
 #if 0
     Color cell_color = ColorFromHSV(0, 0.0, 0.15);
@@ -207,16 +217,15 @@ void plug_update(void) {
   Color background_color = ColorFromHSV(120, 0.0, 1 - 0.95);
 #endif
 
-  BeginDrawing();
-  animation_update(&p->a, GetFrameTime(), kfs, NOB_ARRAY_LEN(kfs));
-  float t = animation_value(p->a, kfs, NOB_ARRAY_LEN(kfs));
+  float t = animation_value(a, kfs, kfs_count);
+
   ClearBackground(background_color);
   for (size_t i = 0; i < 20; ++i) {
     Rectangle rec = {
-        .x = i * (rw + pad) + t,
-        .y = h / 2 - rh / 2,
-        .width = rw,
-        .height = rh,
+        .x = i * (CELL_WIDTH + CELL_PAD) + t,
+        .y = h / 2 - CELL_HEIGHT / 2,
+        .width = CELL_WIDTH,
+        .height = CELL_HEIGHT,
     };
 
     DrawRectangleRec(rec, cell_color);
@@ -231,12 +240,18 @@ void plug_update(void) {
 
   float head_thick = 15.0f;
   Rectangle rec = {
-      .width = rw + head_thick * 3,
-      .height = rh + head_thick * 3,
+      .width = CELL_WIDTH + head_thick * 3,
+      .height = CELL_HEIGHT + head_thick * 3,
   };
   rec.x = w / 2 - rec.width / 2;
   rec.y = h / 2 - rec.height / 2;
   DrawRectangleLinesEx(rec, head_thick, head_color);
+}
 
+void plug_update(void) {
+  float w = GetScreenWidth();
+  float h = GetScreenHeight();
+  BeginDrawing();
+  turing_machine_tape(p->a, GetFrameTime(), w, h);
   EndDrawing();
 }
