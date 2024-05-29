@@ -45,7 +45,7 @@ typedef struct {
   float rendering_duration;
 
   Cell tape[TAPE_COUNT];
-
+  Texture2D zezin;
   Font font;
 } Plug;
 
@@ -78,9 +78,13 @@ void animation_update(Animation *a, float dt, KeyFrame *kfs, size_t kfs_count) {
 static void load_resources(void) {
   p->font =
       LoadFontEx("./resources/fonts/iosevka-Bold.ttf", FONT_SIZE, NULL, 0);
+  p->zezin = LoadTexture("./resources/images/tsodinZezin.png");
 }
 
-static void unload_resources(void) { UnloadFont(p->font); }
+static void unload_resources(void) {
+  UnloadFont(p->font);
+  UnloadTexture(p->zezin);
+}
 
 void plug_init(void) {
   p = malloc(sizeof(*p));
@@ -110,7 +114,12 @@ void plug_post_reload(void *state) {
              p->size, sizeof(*p));
     p = realloc(p, sizeof(*p));
     p->size = sizeof(*p);
+  } else if (p->size > sizeof(*p)) {
+    TraceLog(LOG_ERROR, "Cannot migrate to a new plugin state schema, because "
+                        "the state became smaller");
+    abort();
   }
+
   load_resources();
 }
 
@@ -149,7 +158,7 @@ static KeyFrame head_kfs[] = {
 
 #define head_kfs_count NOB_ARRAY_LEN(head_kfs)
 
-void turing_machine_tape(Animation a, float dt, float w, float h) {
+void turing_machine_tape(Animation *a, float dt, float w, float h) {
   Vector2 cell_size = {CELL_WIDTH, CELL_HEIGHT};
 
   size_t offset = 7;
@@ -205,7 +214,7 @@ void turing_machine_tape(Animation a, float dt, float w, float h) {
   };
 
   size_t kfs_count = NOB_ARRAY_LEN(kfs);
-  animation_update(&a, dt, kfs, kfs_count);
+  animation_update(a, dt, kfs, kfs_count);
 
 #if 0
     Color cell_color = ColorFromHSV(0, 0.0, 0.15);
@@ -217,7 +226,7 @@ void turing_machine_tape(Animation a, float dt, float w, float h) {
   Color background_color = ColorFromHSV(120, 0.0, 1 - 0.95);
 #endif
 
-  float t = animation_value(a, kfs, kfs_count);
+  float t = animation_value(*a, kfs, kfs_count);
 
   ClearBackground(background_color);
   for (size_t i = 0; i < 20; ++i) {
@@ -246,12 +255,14 @@ void turing_machine_tape(Animation a, float dt, float w, float h) {
   rec.x = w / 2 - rec.width / 2;
   rec.y = h / 2 - rec.height / 2;
   DrawRectangleLinesEx(rec, head_thick, head_color);
+
+  DrawTexture(p->zezin, 0, 0, WHITE);
 }
 
 void plug_update(void) {
   float w = GetScreenWidth();
   float h = GetScreenHeight();
   BeginDrawing();
-  turing_machine_tape(p->a, GetFrameTime(), w, h);
+  turing_machine_tape(&p->a, GetFrameTime(), w, h);
   EndDrawing();
 }

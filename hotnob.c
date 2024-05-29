@@ -22,7 +22,7 @@ bool build_plug(Nob_Cmd *cmd) {
   cc(cmd);
   nob_cmd_append(cmd, "-fPIC", "-shared");
   nob_cmd_append(cmd, "-o", "./libplug.so");
-  nob_cmd_append(cmd, "plug.c");
+  nob_cmd_append(cmd, "plug.c", "ffmpeg_linux.c");
   nob_cmd_append(cmd, "./raylib/raylib-5.0_macos/lib/libraylib.dylib");
   nob_cmd_append(cmd, "-rpath", "./raylib/raylib-5.0_macos/lib/");
   nob_cmd_append(cmd, "-lm", "-ldl", "-lpthread");
